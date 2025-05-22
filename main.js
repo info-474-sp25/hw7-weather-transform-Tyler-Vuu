@@ -23,8 +23,59 @@ d3.csv("weather.csv").then(data => {
     // 1.1: Rename and reformat
     data.forEach(d => {
         d.year = new Date(d.date); // Keep full date for now
-        d.precip = +d.average_precipitation; // Convert precipitation to numeric
+        d.temp = +d.mean_temperature_f; // Convert mean temp to numeric
     }); 
+
+
+
+    // Set scales
+    const x = d3.scaleTime()
+        .domain(d3.extent(data, d => d.date))
+        .range([0, width]);
+
+    const y = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.temp)]).nice()
+        .range([height, 0]);
+
+    // Draw X axis
+    svg.append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(x).ticks(d3.timeMonth.every(1)).tickFormat(d3.timeFormat("%m/%Y")))
+        .selectAll("text")
+        .attr("transform", "rotate(-45)")
+        .style("text-anchor", "end");
+
+    // Draw Y axis
+    svg.append("g")
+        .call(d3.axisLeft(y));
+
+    // Add line
+    svg.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-width", 1.5)
+        .attr("d", d3.line()
+            .x(d => x(d.date))
+            .y(d => y(d.temp))
+        );
+
+    // Axis labels
+    svg.append("text")
+        .attr("x", -(height / 2))
+        .attr("y", -50)
+        .attr("transform", "rotate(-90)")
+        .attr("text-anchor", "middle")
+        .text("Mean Temperature per day (Fahrenheit)");
+
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + 50)
+        .attr("text-anchor", "middle")
+        .text("Date");
+
+
+
 
     // Check your work:
     console.log("=== CASE 1: FLATTEN ===");
@@ -64,7 +115,7 @@ d3.csv("weather.csv").then(data => {
     console.log("---------------------------------------------------------------------");
 
     // --- CASE 2: PIVOT ---
-    // 2.1: Rename and reformat
+    // 2.1: Rename and 
     /*
         Uncomment the following code! Hint: highlight and CTRL+/.
     */
